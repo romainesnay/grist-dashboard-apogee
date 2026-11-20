@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tableau de bord UFA UM — APOGEE</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+</head>
+<body>
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div id="loading-text">Chargement des données APOGEE...</div>
+  </div>
+
+  <!-- En-tête + Navigation par onglets (style Power BI) -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 id="page-title">Analyse des inscriptions de l'UM</h1>
+      <span id="badge-count" class="badge">0 lignes</span>
+    </div>
+    <nav class="nav-tabs">
+      <button type="button" class="nav-btn active" data-tab="cover">Page de garde</button>
+      <button type="button" class="nav-btn" data-tab="regime">Régime</button>
+      <button type="button" class="nav-btn" data-tab="annee">Année</button>
+    </nav>
+  </header>
+
+  <!-- ONGLET 1 : PAGE DE GARDE -->
+  <main id="tab-cover" class="tab-content active">
+    <div class="cover-card">
+      <h2>Cartographie des étudiants de l'Université de Montpellier</h2>
+      <p>Ce tableau de bord permet d'analyser les effectifs inscrits à l'UM à partir des extractions du logiciel <strong>APOGEE</strong> (via AMPHI).</p>
+      <p>Les axes analysés sont : les composantes (UEI), les diplômes, les années de diplôme, les parcours/étapes, les profils étudiants et les régimes d'inscription.</p>
+
+      <h3>Précisions méthodologiques</h3>
+      <ul>
+        <li>Il est possible de croiser les informations en utilisant les filtres bleus et roses, ou en cliquant directement sur une barre d'un graphique (<em>cross-filtering</em>).</li>
+        <li>Le filtre <strong>Doublon</strong> permet d'isoler les inscriptions principales des étudiants ayant plusieurs inscriptions la même année (ex. : étudiant inscrit en BUT 3 à l'IUT de Nîmes et en L3 à l'IAE).</li>
+        <li>Les colonnes <strong>Diplôme</strong> et <strong>Année de diplôme</strong> mettent en avant les diplômes principaux utilisés pour l'apprentissage ; les autres formations (DU, C2I, thèses, etc.) sont regroupées dans <code>AUTRE</code>.</li>
+      </ul>
+
+      <h3>Guide des filtres</h3>
+      <ul class="guide-list">
+        <li><span class="c-blue">Régime d'inscription (lib.)</span> : filtre les grands régimes d'inscription (apprentissage, formation continue, initiale, etc.).</li>
+        <li><span class="c-blue">Profil étudiant (lib.)</span> : précise le régime d'inscription (permet notamment de distinguer les apprentis <code>App.CFA LR</code>).</li>
+        <li><span class="c-blue">Composante (lib.)</span> : indique l'UEI de rattachement (FDS, IAE, IUT, Polytech, Médecine, etc.).</li>
+        <li><span class="c-blue">Diplôme / Année de diplôme</span> : précise le niveau et le type de diplôme (L1–L3, M1–M2, BUT1–BUT3, LP, ING, AUTRE).</li>
+        <li><span class="c-blue">Année de l'inscription</span> : indique l'année universitaire d'inscription.</li>
+        <li><span class="c-blue">Doublon</span> : filtre les étudiants inscrits plusieurs fois la même année (<code>Unique</code> vs <code>Doublon</code>).</li>
+      </ul>
+      <ul class="guide-list" style="margin-top: 10px;">
+        <li><span class="c-pink">Statut Initial</span> : filtre les formations (étapes) selon la présence ou non d'étudiants en formation initiale.</li>
+        <li><span class="c-pink">Statut FC</span> : filtre les formations selon la présence ou non d'étudiants en formation continue.</li>
+        <li><span class="c-pink">Statut apprentissage</span> : filtre les formations selon la présence ou non d'étudiants en apprentissage (affiche tous les publics des formations mixtes).</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- ONGLET 2 & 3 : VUE ANALYTIQUE (ANNÉE / RÉGIME) -->
+  <main id="tab-analytics" class="tab-content">
+    <!-- Rangée supérieure : 5 graphiques côte à côte -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span>par Parcours (Top 15)</span>
+          <small class="clear-cross" data-col="IAE - Version d'étape (lib. web)" title="Effacer la sélection graphique">✕</small>
+        </div>
+        <div class="chart-box"><canvas id="chart-parcours"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span>par Profil étudiant</span>
+          <small class="clear-cross" data-col="Profil étudiant (lib.)" title="Effacer la sélection graphique">✕</small>
+        </div>
+        <div class="chart-box"><canvas id="chart-profil"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span>par Diplôme</span>
+          <small class="clear-cross" data-col="Diplôme" title="Effacer la sélection graphique">✕</small>
+        </div>
+        <div class="chart-box"><canvas id="chart-diplome"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span>par Composante</span>
+          <small class="clear-cross" data-col="Composante (lib.)" title="Effacer la sélection graphique">✕</small>
+        </div>
+        <div class="chart-box"><canvas id="chart-composante"></canvas></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <span>par Année de Diplôme</span>
+          <small class="clear-cross" data-col="Année de diplôme" title="Effacer la sélection graphique">✕</small>
+        </div>
+        <div class="chart-box"><canvas id="chart-anneedipl"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Rangée inférieure : TOTAL à gauche + Filtres & Matrice au centre + Statuts formation à droite -->
+    <section class="bottom-grid">
+      <!-- Colonne gauche : Graphique TOTAL -->
+      <div class="chart-card total-card">
+        <div class="chart-header"><span>TOTAL</span></div>
+        <div class="chart-box-tall"><canvas id="chart-total"></canvas></div>
+      </div>
+
+      <!-- Colonne centrale : Filtres bleus + Tableau croisé -->
+      <div class="center-panel">
+        <div class="filters-blue">
+          <div class="f-item">
+            <label>Régime d'inscription (lib.)</label>
+            <select id="f-regime"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Profil étudiant (lib.)</label>
+            <select id="f-profil"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Composante (lib.)</label>
+            <select id="f-composante"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Diplômé (O/N)</label>
+            <select id="f-diplome-on"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Diplôme</label>
+            <select id="f-diplome"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Année de diplôme</label>
+            <select id="f-annee-dipl"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Année de l'inscription</label>
+            <select id="f-annee-insc"><option value="">Tout</option></select>
+          </div>
+          <div class="f-item">
+            <label>Doublon</label>
+            <select id="f-doublon"><option value="">Tout</option></select>
+          </div>
+        </div>
+
+        <div class="matrix-toolbar">
+          <input type="text" id="matrix-search" placeholder="Filtrer les formations dans la matrice..." />
+          <button type="button" id="btn-reset-all">Réinitialiser tous les filtres</button>
+          <button type="button" id="btn-export-csv">Exporter la matrice (CSV)</button>
+        </div>
+
+        <div class="matrix-wrapper">
+          <table id="pivot-table">
+            <thead id="pivot-head"></thead>
+            <tbody id="pivot-body"></tbody>
+            <tfoot id="pivot-foot"></tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Colonne droite : Filtres roses (présence par formation) -->
+      <div class="filters-pink">
+        <div class="pink-title">Filtres par formation (étape)</div>
+        <div class="f-item">
+          <label>Statut Initial</label>
+          <select id="f-statut-init">
+            <option value="">Tout</option>
+            <option value="oui">Avec Initial</option>
+            <option value="non">Sans Initial</option>
+          </select>
+        </div>
+        <div class="f-item">
+          <label>Statut FC</label>
+          <select id="f-statut-fc">
+            <option value="">Tout</option>
+            <option value="oui">Avec FC</option>
+            <option value="non">Sans FC</option>
+          </select>
+        </div>
+        <div class="f-item">
+          <label>Statut apprentissage</label>
+          <select id="f-statut-app">
+            <option value="">Tout</option>
+            <option value="oui">Avec Apprentissage</option>
+            <option value="non">Sans Apprentissage</option>
+          </select>
+        </div>
+        <div class="pink-hint">
+          Filtre toutes les inscriptions des étapes accueillant (ou non) le public sélectionné.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
