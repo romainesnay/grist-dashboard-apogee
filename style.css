@@ -1,0 +1,149 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f5f6f8;
+  color: #1f2937;
+  font-size: 13px;
+  overflow-x: hidden;
+}
+
+#loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,0.92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 9999; gap: 12px; font-weight: 600; color: #951b1e;
+}
+.spinner {
+  width: 34px; height: 34px; border: 4px solid #f3d1d2;
+  border-top-color: #951b1e; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Topbar */
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fff; padding: 10px 18px; border-bottom: 1px solid #e5e7eb;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar h1 { font-size: 20px; font-weight: 600; color: #111827; }
+.badge {
+  background: #fef2f2; color: #951b1e; border: 1px solid #fecaca;
+  padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;
+}
+.nav-tabs { display: flex; gap: 8px; }
+.nav-btn {
+  padding: 8px 20px; border: 1px solid #d1d5db; background: #fff;
+  color: #111827; font-size: 13px; font-weight: 600; cursor: pointer;
+  border-radius: 3px; transition: all 0.15s;
+}
+.nav-btn:hover { background: #f3f4f6; }
+.nav-btn.active { background: #1f2937; color: #fff; border-color: #1f2937; }
+
+.tab-content { display: none; padding: 12px 16px; }
+.tab-content.active { display: block; }
+
+/* Page de garde */
+.cover-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;
+  padding: 24px 32px; max-width: 1050px; margin: 8px auto; line-height: 1.6;
+}
+.cover-card h2 { font-size: 18px; color: #951b1e; margin-bottom: 10px; }
+.cover-card h3 { font-size: 14px; color: #111827; margin: 16px 0 6px; }
+.cover-card ul { padding-left: 20px; }
+.cover-card li { margin-bottom: 4px; }
+.c-blue { color: #0284c7; font-weight: 600; }
+.c-pink { color: #db2777; font-weight: 600; }
+
+/* Grille des 5 graphiques */
+.charts-grid {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px; margin-bottom: 10px;
+}
+.chart-card {
+  background: #fff; border: 1px solid #d1d5db; border-radius: 4px;
+  padding: 8px 10px; display: flex; flex-direction: column;
+}
+.chart-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-weight: 700; font-size: 12.5px; color: #111827; margin-bottom: 4px;
+}
+.clear-cross {
+  display: none; cursor: pointer; color: #951b1e; background: #fee2e2;
+  padding: 0 5px; border-radius: 3px; font-size: 11px;
+}
+.clear-cross.visible { display: inline-block; }
+.chart-box { position: relative; height: 225px; width: 100%; }
+.chart-box-tall { position: relative; height: 365px; width: 100%; }
+
+/* Grille inférieure */
+.bottom-grid {
+  display: grid; grid-template-columns: 160px 1fr 200px;
+  gap: 10px; align-items: stretch;
+}
+.center-panel { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Bloc filtres bleus */
+.filters-blue {
+  background: #8cc2f2; border-radius: 4px; padding: 8px 10px;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;
+}
+.f-item {
+  background: #fff; padding: 5px 8px; border-radius: 3px;
+  border: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 3px;
+}
+.f-item label { font-size: 11px; font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-item select {
+  border: 1px solid #cbd5e1; border-radius: 2px; padding: 3px 4px;
+  font-size: 12px; background: #fff; color: #0f172a; width: 100%;
+}
+
+/* Bloc filtres roses */
+.filters-pink {
+  background: #f5b5d8; border-radius: 4px; padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.pink-title { font-size: 11.5px; font-weight: 700; color: #831843; }
+.pink-hint { font-size: 11px; color: #831843; line-height: 1.35; margin-top: auto; }
+
+/* Barre matrice + Tableau croisé */
+.matrix-toolbar {
+  display: flex; gap: 8px; align-items: center;
+}
+.matrix-toolbar input {
+  flex: 1; padding: 5px 9px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;
+}
+.matrix-toolbar button {
+  padding: 5px 10px; border: 1px solid #cbd5e1; background: #fff;
+  border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.matrix-toolbar button:hover { background: #f1f5f9; }
+#btn-reset-all { border-color: #951b1e; color: #951b1e; }
+
+.matrix-wrapper {
+  background: #fff; border: 1px solid #d1d5db; border-radius: 4px;
+  max-height: 250px; overflow: auto;
+}
+#pivot-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#pivot-table th, #pivot-table td {
+  padding: 5px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; white-space: nowrap;
+}
+#pivot-table th:first-child, #pivot-table td:first-child {
+  text-align: left; position: sticky; left: 0; background: inherit;
+  max-width: 340px; overflow: hidden; text-overflow: ellipsis;
+}
+#pivot-table thead th {
+  position: sticky; top: 0; background: #f8fafc; font-weight: 700;
+  border-bottom: 2px solid #94a3b8; z-index: 2;
+}
+#pivot-table tbody tr:nth-child(even) { background: #f8fafc; }
+#pivot-table tbody tr:nth-child(odd) { background: #ffffff; }
+#pivot-table tbody tr:hover { background: #fef2f2; }
+#pivot-table tfoot td {
+  position: sticky; bottom: 0; background: #f1f5f9; font-weight: 700;
+  border-top: 2px solid #94a3b8; z-index: 2;
+}
+
+@media (max-width: 1200px) {
+  .charts-grid { grid-template-columns: repeat(2, 1fr); }
+  .bottom-grid { grid-template-columns: 1fr; }
+}
