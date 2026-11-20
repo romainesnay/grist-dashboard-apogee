@@ -265,8 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 : `${ctx.dataset.label} : ${ctx.parsed.y.toLocaleString('fr-FR')}`
             }
           },
-          datalabels: {
-            display: (ctx) => isRegimeMode && ctx.dataset.data[ctx.dataIndex] >= 8,
+            datalabels: {
+            display: (ctx) => isRegimeMode && ctx.dataset.data[ctx.dataIndex] >= 12,
             color: '#fff',
             font: { weight: 'bold', size: 9.5 },
             formatter: (v) => `${Math.round(v)}%`
