@@ -160,10 +160,7 @@ body {
   z-index: 4;
   background: #e2e8f0;
 }
-#pivot-table tfoot td {
-  position: sticky; bottom: 0; background: #f1f5f9; font-weight: 700;
-  border-top: 2px solid #94a3b8; z-index: 2;
-}
+
 
 @media (max-width: 1200px) {
   .charts-grid { grid-template-columns: repeat(2, 1fr); }
